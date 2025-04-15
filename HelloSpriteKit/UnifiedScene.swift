@@ -6,11 +6,12 @@
 //
 import SpriteKit
 
+
 class UnifiedScene: SKScene {
     let ingredients = [
-        Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice", possibleEffects: [.affection, .health]),
-        Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice", possibleEffects: [.memory, .courage]),
-        Ingredient(imageNames: ["c1", "c2", "c3"], dicedTextureName: "dices", possibleEffects: [.wisdom, .affection])
+        Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice", possibleEffects: [IngredientEffect(type: .affection, isPositive: true), IngredientEffect(type: .health, isPositive: true)]),
+        Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice", possibleEffects: [IngredientEffect(type: .memory, isPositive: true), IngredientEffect(type: .wisdom, isPositive: false)]),
+        Ingredient(imageNames: ["c1", "c2", "c3"], dicedTextureName: "dices", possibleEffects: [IngredientEffect(type: .health, isPositive: true), IngredientEffect(type: .memory, isPositive: false)])
     ]
     
     let cauldronsData = [
@@ -18,8 +19,10 @@ class UnifiedScene: SKScene {
         Cauldron(effect: .iron)
     ]
     
+    var selectedCauldronIndex = 0
+   var selectedCauldronSprite: CauldronSprite!
     var selectedIngredient: IngredientSprite? = nil
-    
+    var potionSprite: PotionSprite!
     
     //MARK: CHOPPING ACTION
     var block: ChoppingBlockSprite!
@@ -79,6 +82,13 @@ class UnifiedScene: SKScene {
         }
     }
     
+    func setupPotion(with firstIngredient: Ingredient) {
+        let potion = Potion(ingredients: [firstIngredient])
+        potionSprite = PotionSprite(potion: potion)
+        
+        addChild(potionSprite)
+    }
+    
     func setupBlock() {
         block = ChoppingBlockSprite(imageNamed: "block")
         block.size = CGSize(width: 350, height: 150)
@@ -86,6 +96,8 @@ class UnifiedScene: SKScene {
         block.zPosition = -5
         addChild(block)
     }
+    
+
     
     func moveIngredientToClickedDestination(touches: Set<UITouch>) {
         guard let touch = touches.first else { return }
