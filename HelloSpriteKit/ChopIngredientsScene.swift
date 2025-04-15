@@ -46,7 +46,7 @@ class IngredientSprite: SKSpriteNode {
     }
 }
 
-class GameScene2: SKScene {
+class ChopIngredientsScene: SKScene {
     let redIngredient = Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice")
     let greenIngredient = Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice")
     

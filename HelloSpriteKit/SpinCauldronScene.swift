@@ -1,6 +1,6 @@
 import SpriteKit
 
-class GameScene: SKScene {
+class SpinCauldronScene: SKScene {
     var isTouching = false
     var potion: SKSpriteNode!
     var doneBar: SKSpriteNode!

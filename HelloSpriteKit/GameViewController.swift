@@ -3,7 +3,7 @@ import SpriteKit
 
 class GameViewController: UIViewController {
 
-    let scene = GameScene2()
+    let scene = ChopIngredientsScene()
     
     let skView = SKView()
     
