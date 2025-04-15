@@ -3,9 +3,8 @@ import SpriteKit
 
 class GameViewController: UIViewController {
 
-    let scene = ChopIngredientsScene()
-    
     let skView = SKView()
+    var scene: UnifiedScene?
     
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -16,6 +15,7 @@ class GameViewController: UIViewController {
     private func setupSKView() {
         view.addSubview(skView)
         skView.translatesAutoresizingMaskIntoConstraints = false
+        
         NSLayoutConstraint.activate([
             skView.topAnchor.constraint(equalTo: view.safeAreaLayoutGuide.topAnchor),
             skView.bottomAnchor.constraint(equalTo: view.safeAreaLayoutGuide.bottomAnchor),
@@ -28,9 +28,13 @@ class GameViewController: UIViewController {
     }
     
     override func viewDidLayoutSubviews() {
-        super.viewDidLayoutSubviews()
-        scene.scaleMode = .resizeFill
-        skView.presentScene(scene)
-    }
+         super.viewDidLayoutSubviews()
+         
+         if scene == nil {
+             scene = UnifiedScene(size: skView.bounds.size)
+             scene?.scaleMode = .resizeFill
+             skView.presentScene(scene)
+         }
+     }
 }
 

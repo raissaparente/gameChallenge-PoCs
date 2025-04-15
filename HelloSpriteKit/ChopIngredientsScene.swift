@@ -7,48 +7,12 @@
 
 import SpriteKit
 
-struct Ingredient {
-    var imageNames: [String]
-    var dicedTextureName: String
-    var possibleEffects = ["Affection", "Wisdom"]
-    var activeEffect: String?
-    
-    init(imageNames: [String], dicedTextureName: String, possibleEffects: [String] = ["Affection", "Wisdom"], activeEffect: String? = nil) {
-        self.imageNames = imageNames
-        self.dicedTextureName = dicedTextureName
-        self.possibleEffects = possibleEffects
-        self.activeEffect = activeEffect
-        
-        self.chooseEffect(isDiced: false)
-    }
 
-    
-    mutating func chooseEffect(isDiced: Bool) {
-        if isDiced {
-            activeEffect = possibleEffects.last
-        } else {
-            activeEffect = possibleEffects.first
-        }
-    }
-}
 
-class IngredientSprite: SKSpriteNode {
-    var ingredient: Ingredient
-    
-    init(ingredient: Ingredient) {
-        self.ingredient = ingredient
-        let texture = SKTexture(imageNamed: ingredient.imageNames.first ?? "")
-        super.init(texture: texture, color: .clear, size: texture.size())
-    }
-    
-    required init?(coder aDecoder: NSCoder) {
-        fatalError("init(coder:) has not been implemented")
-    }
-}
 
 class ChopIngredientsScene: SKScene {
-    let redIngredient = Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice")
-    let greenIngredient = Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice")
+    let redIngredient = Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice", possibleEffects: [.affection, .health])
+    let greenIngredient = Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice", possibleEffects: [.memory, .courage])
     
     var ingredientSprite: IngredientSprite!
     var counter: SKLabelNode!
@@ -74,7 +38,7 @@ class ChopIngredientsScene: SKScene {
     override func update(_ currentTime: TimeInterval) {
         if currentNumberClicks >= maxNumberClicks {
             ingredientSprite.ingredient.chooseEffect(isDiced: true)
-            counter.text = "Current Effect: \(ingredientSprite.ingredient.activeEffect ?? "")"
+            counter.text = "Current Effect: \(ingredientSprite.ingredient.activeEffect?.effectText ?? "")"
             didFinishDicing = true
             ingredientSprite.texture = SKTexture(imageNamed: ingredientSprite.ingredient.imageNames[1])
         } else if currentNumberClicks > 10 {
@@ -112,7 +76,7 @@ class ChopIngredientsScene: SKScene {
         ingredientSprite.position = CGPoint(x: size.width/2, y: size.height/2)
         addChild(ingredientSprite)
         
-        counter = SKLabelNode(text: "Current Effect: \(ingredientSprite.ingredient.activeEffect ?? "")")
+        counter = SKLabelNode(text: "Current Effect: \(ingredientSprite.ingredient.activeEffect?.effectText ?? "")")
         counter.fontColor = .white
         counter.fontSize = 40
         counter.position = CGPoint(x: size.width/2, y: size.height - 100)
