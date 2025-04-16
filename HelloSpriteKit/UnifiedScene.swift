@@ -38,7 +38,7 @@ class UnifiedScene: SKScene {
     var statusLabel: SKLabelNode!
     
     var sandboxArea: SandboxArea!
-
+    
     
     override init(size: CGSize) {
         super.init(size: size)
@@ -82,36 +82,36 @@ class UnifiedScene: SKScene {
     func setupCauldrons() {
         let xPosition = size.width * 0.3
         let yPosition = size.height * 0.2
-
+        
         let cauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
         cauldron.position = CGPoint(x: xPosition, y: yPosition)
         cauldron.setScale(0.25)
-
+        
         selectedCauldronSprite = cauldron
         addChild(cauldron)
     }
-
+    
     func switchCauldron() {
         // remove current cauldron
         selectedCauldronSprite.removeFromParent()
-
+        
         // update index
         selectedCauldronIndex = (selectedCauldronIndex + 1) % cauldronsData.count
-
+        
         // add new cauldron
         let xPosition = size.width * 0.3
         let yPosition = size.height * 0.2
-
+        
         let newCauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
         newCauldron.position = CGPoint(x: xPosition, y: yPosition)
         newCauldron.setScale(0.25)
-
+        
         selectedCauldronSprite = newCauldron
         addChild(newCauldron)
         
         printStatus()
     }
-
+    
     func setupSwitchButton() {
         let button = SKLabelNode(text: "Switch")
         button.name = "switchButton"
@@ -157,13 +157,31 @@ class UnifiedScene: SKScene {
         if tappedNode.name == "switchButton" {
             switchCauldron()
             return
-       }
+        }
         
         //select ingredient
         if let ingredient = tappedNode as? IngredientSprite {
             
-            guard ingredient.state == .idle || ingredient.state == .chopped else { return }
+            if let ingredient = tappedNode as? IngredientSprite {
+                
+                if let selected = selectedIngredient {
+                    if selected != ingredient {
+                        let posicao = selected.position
+                        
+                        let moveAction = SKAction.move(to: ingredient.position, duration: 0.3)
+                        selected.run(moveAction)
+                        print("moveu o primeiro pro segundo")
+                        
+                        let moveAction2 = SKAction.move(to: posicao, duration: 0.2)
+                        ingredient.run(moveAction2)
+                        print("moveu o segundo pro primeiro")
+                        
+                        return
+                    } else { return }
+                }
+            }
             
+            guard ingredient.state == .idle || ingredient.state == .chopped else { return }
             
             if selectedIngredient == ingredient {
                 ingredient.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
@@ -184,18 +202,22 @@ class UnifiedScene: SKScene {
             let sandboxLocation = touch.location(in: sandboxArea)
             
             let moveAction = SKAction.move(to: sandboxLocation, duration: 0.2)
-
+            
+            if let _ = sandboxArea.firstSlot.childNode(withName: selected.name!) {
+                sandboxArea.clearSlot(sandboxArea.firstSlot)
+            } else if (sandboxArea.secondSlot.childNode(withName: selected.name!) != nil) {
+                sandboxArea.clearSlot(sandboxArea.secondSlot)
+            }
+            
             if let slot = sandboxArea.slotForPosition(sandboxLocation) {
                 let added = sandboxArea.addIngredient(selected, to: slot)
-//                if added {
-//                    selected.removeFromParent()
-//                }
             }
+            
+            
         }
         
         //take ingredient to cauldron
         if let selected = selectedIngredient as? IngredientSprite, let cauldronSprite = tappedNode as? CauldronSprite {
-
             
             let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
             selected.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
@@ -217,12 +239,13 @@ class UnifiedScene: SKScene {
             printStatus()
             
             // take ingredient to chopping block
-        } else if let selected = selectedIngredient as? IngredientSprite, let block = tappedNode as? ChoppingBlockSprite {
+        } else if let selected = selectedIngredient as? IngredientSprite, let block = tappedNode as? ChoppingBlockSprite {            
+            selectedIngredient?.removeFromParent()
+            addChild(selected)
             
             let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
-            selected.run(moveAction)
+            selectedIngredient?.run(moveAction)
             
-            selectedIngredient?.removeFromParent()
             selectedIngredient?.state = .choppingBlock
             
             printStatus()
@@ -279,7 +302,7 @@ class UnifiedScene: SKScene {
     
     func printStatus() {
         var text = ""
-
+        
         // Ingrediente selecionado
         if let selected = selectedIngredient {
             let name = selected.ingredient.imageNames.first ?? "?"
@@ -288,7 +311,7 @@ class UnifiedScene: SKScene {
         } else {
             text += "🧪 Nenhum ingrediente selecionado\n\n"
         }
-
+        
         // Ingredientes no caldeirão
         let ingredients = selectedCauldronSprite.cauldron.ingredients
         text += "🫕 Ingredientes no caldeirão:\n"
@@ -301,7 +324,7 @@ class UnifiedScene: SKScene {
                 text += "- \(index+1): \(name) [\(effect)]\n"
             }
         }
-
+        
         text += "\n💥 Efeitos da poção:\n"
         if let potion = potionSprite?.potion {
             if potion.effects.isEmpty {
@@ -314,7 +337,7 @@ class UnifiedScene: SKScene {
         } else {
             text += "- Nenhuma poção criada\n"
         }
-
+        
         statusLabel.text = text
     }
     

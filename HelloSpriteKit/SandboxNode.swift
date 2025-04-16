@@ -41,15 +41,15 @@ class SandboxArea: SKSpriteNode {
     
     func addIngredient(_ ingredient: SKSpriteNode, to slot: SKSpriteNode) -> Bool {
         if slot == firstSlot && firstIngredient == nil {
-            ingredient.position = .zero
             ingredient.removeFromParent()
             firstSlot.addChild(ingredient)
+            ingredient.position = .zero
             firstIngredient = ingredient
             return true
         } else if slot == secondSlot && secondIngredient == nil {
-            ingredient.position = .zero
             ingredient.removeFromParent()
             secondSlot.addChild(ingredient)
+            ingredient.position = .zero
             secondIngredient = ingredient
             return true
         }

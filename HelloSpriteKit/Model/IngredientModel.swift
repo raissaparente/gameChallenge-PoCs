@@ -84,6 +84,7 @@ class IngredientSprite: SKSpriteNode {
         
         let texture = SKTexture(imageNamed: ingredient.imageNames.first ?? "")
         super.init(texture: texture, color: .clear, size: texture.size())
+        name = ingredient.imageNames.first
     }
     
     required init?(coder aDecoder: NSCoder) {
