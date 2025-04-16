@@ -20,7 +20,7 @@ class UnifiedScene: SKScene {
     ]
     
     var selectedCauldronIndex = 0
-   var selectedCauldronSprite: CauldronSprite!
+    var selectedCauldronSprite: CauldronSprite!
     var potionSprite: PotionSprite!
     
     var selectedIngredient: IngredientSprite? = nil
@@ -187,9 +187,9 @@ class UnifiedScene: SKScene {
 
             if let slot = sandboxArea.slotForPosition(sandboxLocation) {
                 let added = sandboxArea.addIngredient(selected, to: slot)
-                if added {
-                    selected.removeFromParent()
-                }
+//                if added {
+//                    selected.removeFromParent()
+//                }
             }
         }
         
@@ -222,6 +222,7 @@ class UnifiedScene: SKScene {
             let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
             selected.run(moveAction)
             
+            selectedIngredient?.removeFromParent()
             selectedIngredient?.state = .choppingBlock
             
             printStatus()
