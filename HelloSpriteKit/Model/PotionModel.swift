@@ -9,7 +9,10 @@ import SpriteKit
 
 struct Potion {
     var ingredients: [Ingredient]
-    var imageName: String = "potion1" //provavelmente vai ser computada a partir da logica de assets
+    var imageName: String {
+        //provavelmente vai ser computada a partir da logica de assets
+           return "potion1"
+       }
     
     var effects: [IngredientEffect] {
         if let firstEffect = ingredients.first?.activeEffect, let secondEffect = ingredients.last?.activeEffect {
@@ -17,6 +20,10 @@ struct Potion {
         } else {
             return []
         }
+    }
+    
+    mutating func addIngredient(_ ingredient: Ingredient) {
+        self.ingredients.append(ingredient)
     }
     
     //COLOCAR SABOR COMO VARIAVEL COMPUTADA AQUI

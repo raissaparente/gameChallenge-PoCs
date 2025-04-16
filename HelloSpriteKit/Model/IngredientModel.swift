@@ -22,10 +22,12 @@ struct Ingredient {
         self.chooseEffect(isDiced: false)
     }
     
+    //quando picar
     mutating func chooseEffect(isDiced: Bool) {
         activeEffect = isDiced ? possibleEffects.last : possibleEffects.first
     }
     
+    //quando mudar o caldeirao
     mutating func toggleActiveEffect() {
         activeEffect?.toggle()
     }
