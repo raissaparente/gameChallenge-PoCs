@@ -70,7 +70,7 @@ struct IngredientEffect: Codable, Identifiable {
 }
 
 enum IngredientState {
-    case idle, choppingBlock, chopped, inCauldron, cooking
+    case idle, inChoppingBlock, chopped, inCauldron, cooking
 }
 
 

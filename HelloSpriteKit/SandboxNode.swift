@@ -40,21 +40,23 @@ class SandboxArea: SKSpriteNode {
     
     
     func addIngredient(_ ingredient: SKSpriteNode, to slot: SKSpriteNode) -> Bool {
-        if slot == firstSlot && firstIngredient == nil {
-            ingredient.removeFromParent()
-            firstSlot.addChild(ingredient)
+        
+        if (slot == firstSlot && firstIngredient != nil) || (slot == secondSlot && secondIngredient != nil) {
+                return false
+        }        
+        
+        ingredient.removeFromParent()
+        slot.addChild(ingredient)
+        
+        if slot == firstSlot  {
             ingredient.position = .zero
             firstIngredient = ingredient
-            return true
-        } else if slot == secondSlot && secondIngredient == nil {
-            ingredient.removeFromParent()
-            secondSlot.addChild(ingredient)
+        } else if slot == secondSlot {
             ingredient.position = .zero
             secondIngredient = ingredient
-            return true
         }
-        
-        return false // Slot já está ocupado
+        return true
+
     }
     
     func clearSlot(_ slot: SKSpriteNode) {
