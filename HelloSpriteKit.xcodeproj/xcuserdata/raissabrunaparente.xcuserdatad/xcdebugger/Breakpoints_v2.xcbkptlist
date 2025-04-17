@@ -7,16 +7,32 @@
       <BreakpointProxy
          BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
          <BreakpointContent
-            uuid = "7DDB5E71-DBB9-4987-A574-141F9DA61ECF"
+            uuid = "10C5C3BE-89BA-4DF5-BF2B-11832E8A0D24"
             shouldBeEnabled = "No"
             ignoreCount = "0"
             continueAfterRunningActions = "No"
             filePath = "HelloSpriteKit/UnifiedScene.swift"
             startingColumnNumber = "9223372036854775807"
             endingColumnNumber = "9223372036854775807"
-            startingLineNumber = "241"
-            endingLineNumber = "241"
-            landmarkName = "updateChopIngredient()"
+            startingLineNumber = "94"
+            endingLineNumber = "94"
+            landmarkName = "UnifiedScene"
+            landmarkType = "3">
+         </BreakpointContent>
+      </BreakpointProxy>
+      <BreakpointProxy
+         BreakpointExtensionID = "Xcode.Breakpoint.FileBreakpoint">
+         <BreakpointContent
+            uuid = "B9D004BD-F61C-421B-9FC6-6B034FB95AFF"
+            shouldBeEnabled = "No"
+            ignoreCount = "0"
+            continueAfterRunningActions = "No"
+            filePath = "HelloSpriteKit/UnifiedScene.swift"
+            startingColumnNumber = "9223372036854775807"
+            endingColumnNumber = "9223372036854775807"
+            startingLineNumber = "188"
+            endingLineNumber = "188"
+            landmarkName = "moveIngredientToClickedDestination(touches:)"
             landmarkType = "7">
          </BreakpointContent>
       </BreakpointProxy>

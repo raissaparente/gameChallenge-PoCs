@@ -34,7 +34,6 @@ class UnifiedScene: SKScene {
     var maxNumberClicks = 20
     var didFinishDicing = false
     
-    
     var statusLabel: SKLabelNode!
     
     var sandboxArea: SandboxArea!
@@ -65,31 +64,6 @@ class UnifiedScene: SKScene {
         updateChopIngredient()
     }
     
-    func setupIngredients() {
-        let spacing: CGFloat = 100
-        let centerY = size.height / 2
-        let xPosition = size.width * 0.9
-        
-        for (index, data) in ingredients.enumerated() {
-            let ingredient = IngredientSprite(ingredient: data)
-            let offset = CGFloat(index - (ingredients.count - 1) / 2) * spacing
-            ingredient.position = CGPoint(x: xPosition, y: centerY + offset)
-            ingredient.setScale(ingredientScaleNormal)
-            addChild(ingredient)
-        }
-    }
-    
-    func setupCauldrons() {
-        let xPosition = size.width * 0.3
-        let yPosition = size.height * 0.2
-        
-        let cauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
-        cauldron.position = CGPoint(x: xPosition, y: yPosition)
-        cauldron.setScale(0.25)
-        
-        selectedCauldronSprite = cauldron
-        addChild(cauldron)
-    }
     
     func switchCauldron() {
         // remove current cauldron
@@ -112,149 +86,11 @@ class UnifiedScene: SKScene {
         printStatus()
     }
     
-    func setupSwitchButton() {
-        let button = SKLabelNode(text: "Switch")
-        button.name = "switchButton"
-        button.fontSize = 20
-        button.position = CGPoint(x: size.width * 0.1, y: size.height * 0.1)
-        addChild(button)
-    }
-    
-    func setupPotion(with firstIngredient: Ingredient) {
-        let potion = Potion(ingredients: [firstIngredient])
-        potionSprite = PotionSprite(potion: potion)
-        potionSprite.position = selectedCauldronSprite.position
-        potionSprite.size = selectedCauldronSprite.size
-        potionSprite.setScale(0.65)
-        potionSprite.zPosition = 5
-        
-        addChild(potionSprite)
-    }
     
     func updatePotion(with secondIngredient: Ingredient) {
         potionSprite.potion.addIngredient(secondIngredient)
     }
     
-    func setupBlock() {
-        block = ChoppingBlockSprite(imageNamed: "block")
-        block.size = CGSize(width: 350, height: 150)
-        block.position = CGPoint(x: size.width * 0.2, y: size.height * 0.75)
-        block.zPosition = -5
-        addChild(block)
-        
-        sandboxArea = SandboxArea(color: .darkGray, size: CGSize(width: 250, height: 120))
-        sandboxArea.position = CGPoint(x: size.width * 0.55, y: size.height * 0.75)
-        addChild(sandboxArea)
-    }
-    
-    func moveIngredientToClickedDestination(touches: Set<UITouch>) {
-        guard let touch = touches.first else { return }
-        
-        let location = touch.location(in: self)
-        let tappedNode = atPoint(location)
-        
-        //switch cauldrons
-        if tappedNode.name == "switchButton" {
-            switchCauldron()
-            return
-        }
-        
-        //select ingredient
-        if let ingredient = tappedNode as? IngredientSprite {
-            
-            if let ingredient = tappedNode as? IngredientSprite {
-                
-                if let selected = selectedIngredient {
-                    if selected != ingredient {
-                        let posicao = selected.position
-                        
-                        let moveAction = SKAction.move(to: ingredient.position, duration: 0.3)
-                        selected.run(moveAction)
-                        print("moveu o primeiro pro segundo")
-                        
-                        let moveAction2 = SKAction.move(to: posicao, duration: 0.2)
-                        ingredient.run(moveAction2)
-                        print("moveu o segundo pro primeiro")
-                        
-                        return
-                    } else { return }
-                }
-            }
-            
-            guard ingredient.state == .idle || ingredient.state == .chopped else { return }
-            
-            if selectedIngredient == ingredient {
-                ingredient.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
-                selectedIngredient = nil
-            } else {
-                selectedIngredient?.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
-                selectedIngredient = ingredient
-                selectedIngredient?.run(SKAction.scale(to: ingredientScaleSelected, duration: 0.1))
-            }
-            
-            printStatus()
-            return
-        }
-        
-        //take ingredient to slot
-        if let selected = selectedIngredient as? IngredientSprite {
-            
-            let sandboxLocation = touch.location(in: sandboxArea)
-            
-            let moveAction = SKAction.move(to: sandboxLocation, duration: 0.2)
-            
-            if let _ = sandboxArea.firstSlot.childNode(withName: selected.name!) {
-                sandboxArea.clearSlot(sandboxArea.firstSlot)
-            } else if (sandboxArea.secondSlot.childNode(withName: selected.name!) != nil) {
-                sandboxArea.clearSlot(sandboxArea.secondSlot)
-            }
-            
-            if let slot = sandboxArea.slotForPosition(sandboxLocation) {
-                let added = sandboxArea.addIngredient(selected, to: slot)
-            }
-            
-            
-        }
-        
-        //take ingredient to cauldron
-        if let selected = selectedIngredient as? IngredientSprite, let cauldronSprite = tappedNode as? CauldronSprite {
-            
-            let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
-            selected.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
-            
-            var ingredientData = selected.ingredient
-            cauldronSprite.cauldron.effect.effect(ingredient: &ingredientData)
-            
-            selected.run(SKAction.scale(to: 0.2, duration: 0.1))
-            
-            //add ingredient to cauldron
-            cauldronSprite.cauldron.addIngredient(ingredientData)
-            if potionSprite == nil {
-                setupPotion(with: ingredientData)
-            } else {
-                updatePotion(with: ingredientData)
-            }
-            selectedIngredient = nil
-            
-            printStatus()
-            
-            // take ingredient to chopping block
-        } else if let selected = selectedIngredient as? IngredientSprite, let block = tappedNode as? ChoppingBlockSprite {            
-            selectedIngredient?.removeFromParent()
-            addChild(selected)
-            
-            let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
-            selectedIngredient?.run(moveAction)
-            
-            selectedIngredient?.state = .choppingBlock
-            
-            printStatus()
-            
-        } else if let selected = selectedIngredient {
-            selected.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
-            selectedIngredient = nil
-        }
-    }
     
     func updateChopIngredient() {
         guard let ingredientSprite = selectedIngredient else { return }
@@ -341,8 +177,189 @@ class UnifiedScene: SKScene {
         statusLabel.text = text
     }
     
+    //MARK: TOUCHES BEGAN BEHAVIOUR
+    func moveIngredientToClickedDestination(touches: Set<UITouch>) {
+        guard let touch = touches.first else { return }
+        
+        let location = touch.location(in: self)
+        let tappedNode = atPoint(location)
+        
+        if tapSwitchCauldronButton(tappedNode) { return }
+        if selectIngredient(tappedNode) { return }
+        if takeSelectedToSandbox(touch) { return }
+        if takeSelectedToCauldron(tappedNode) { return }
+        if takeSelectedToBlock(tappedNode) { return }
+            
+        if let selected = selectedIngredient {
+            selected.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
+            selectedIngredient = nil
+        }
+    }
+    
+    func tapSwitchCauldronButton(_ tappedNode: SKNode) -> Bool {
+        guard tappedNode.name == "switchButton" else { return false }
+        switchCauldron()
+        return true
+    }
+    
+    func selectIngredient(_ tappedNode: SKNode) -> Bool {
+        guard let tappedIngredient = tappedNode as? IngredientSprite else { return false }
+        
+        //trocar ingredientes
+        if let selected = selectedIngredient, selected != tappedIngredient {
+            swapSelectedIngredient(selected, with: tappedIngredient)
+        }
+            
+        guard tappedIngredient.state == .idle || tappedIngredient.state == .chopped else { return false }
+            
+        //selecionar ingrediente
+        if selectedIngredient == tappedIngredient {
+            tappedIngredient.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
+            selectedIngredient = nil
+        } else {
+            selectedIngredient?.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
+            selectedIngredient = tappedIngredient
+            selectedIngredient?.run(SKAction.scale(to: ingredientScaleSelected, duration: 0.1))
+        }
+            
+        printStatus()
+        return true
+    }
+
+    func swapSelectedIngredient(_ selected: IngredientSprite, with newIngredient: IngredientSprite) {
+        let posicao = selected.position
+        
+        let moveAction = SKAction.move(to: newIngredient.position, duration: 0.3)
+        selected.run(moveAction)
+        print("moveu o primeiro pro segundo")
+        
+        let moveAction2 = SKAction.move(to: posicao, duration: 0.2)
+        newIngredient.run(moveAction2)
+        print("moveu o segundo pro primeiro")
+    }
+    
+    func takeSelectedToSandbox(_ touch: UITouch) -> Bool {
+        guard let selected = selectedIngredient else { return false }
+            
+        let sandboxLocation = touch.location(in: sandboxArea)
+        let moveAction = SKAction.move(to: sandboxLocation, duration: 0.2)
+        
+        if let _ = sandboxArea.firstSlot.childNode(withName: selected.name!) {
+            sandboxArea.clearSlot(sandboxArea.firstSlot)
+        } else if (sandboxArea.secondSlot.childNode(withName: selected.name!) != nil) {
+            sandboxArea.clearSlot(sandboxArea.secondSlot)
+        }
+        
+        if let slot = sandboxArea.slotForPosition(sandboxLocation) {
+            let added = sandboxArea.addIngredient(selected, to: slot)
+        }
+        
+        return true
+    }
+    
+    func takeSelectedToBlock(_ tappedNode: SKNode) -> Bool{
+        guard let selected = selectedIngredient as? IngredientSprite else { return false }
+        guard let block = tappedNode as? ChoppingBlockSprite else { return false }
+        
+            selectedIngredient?.removeFromParent()
+            addChild(selected)
+            
+            let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
+            selectedIngredient?.run(moveAction)
+            
+            selectedIngredient?.state = .choppingBlock
+                        printStatus()
+        return true
+    }
+    
+    func takeSelectedToCauldron(_ tappedNode: SKNode) -> Bool{
+        guard let selected = selectedIngredient else { return false }
+        guard let cauldronSprite = tappedNode as? CauldronSprite else { return false }
+            
+        //move ingredient to cauldron
+        let moveAction = SKAction.move(to: tappedNode.position, duration: 0.2)
+        selected.run(SKAction.sequence([moveAction, SKAction.removeFromParent()]))
+        
+        var ingredientData = selected.ingredient
+        cauldronSprite.cauldron.effect.effect(ingredient: &ingredientData)
+        
+        selected.run(SKAction.scale(to: 0.2, duration: 0.1))
+        
+        
+        //add ingredient to cauldron
+        cauldronSprite.cauldron.addIngredient(ingredientData)
+        if potionSprite == nil {
+            setupPotion(with: ingredientData)
+        } else {
+            updatePotion(with: ingredientData)
+        }
+        
+        selectedIngredient = nil
+        printStatus()
+        return true
+    }
+    
+    
+    //MARK: SETUP UI
+    func setupIngredients() {
+        let spacing: CGFloat = 100
+        let centerY = size.height / 2
+        let xPosition = size.width * 0.9
+        
+        for (index, data) in ingredients.enumerated() {
+            let ingredient = IngredientSprite(ingredient: data)
+            let offset = CGFloat(index - (ingredients.count - 1) / 2) * spacing
+            ingredient.position = CGPoint(x: xPosition, y: centerY + offset)
+            ingredient.setScale(ingredientScaleNormal)
+            addChild(ingredient)
+        }
+    }
+    
+    func setupCauldrons() {
+        let xPosition = size.width * 0.3
+        let yPosition = size.height * 0.2
+        
+        let cauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
+        cauldron.position = CGPoint(x: xPosition, y: yPosition)
+        cauldron.setScale(0.25)
+        
+        selectedCauldronSprite = cauldron
+        addChild(cauldron)
+    }
+    
+    func setupBlock() {
+        block = ChoppingBlockSprite(imageNamed: "block")
+        block.size = CGSize(width: 350, height: 150)
+        block.position = CGPoint(x: size.width * 0.2, y: size.height * 0.75)
+        block.zPosition = -5
+        addChild(block)
+        
+        sandboxArea = SandboxArea(color: .darkGray, size: CGSize(width: 250, height: 120))
+        sandboxArea.position = CGPoint(x: size.width * 0.55, y: size.height * 0.75)
+        addChild(sandboxArea)
+    }
+
+    func setupPotion(with firstIngredient: Ingredient) {
+        let potion = Potion(ingredients: [firstIngredient])
+        potionSprite = PotionSprite(potion: potion)
+        potionSprite.position = selectedCauldronSprite.position
+        potionSprite.size = selectedCauldronSprite.size
+        potionSprite.setScale(0.65)
+        potionSprite.zPosition = 5
+        
+        addChild(potionSprite)
+    }
+    
+    func setupSwitchButton() {
+        let button = SKLabelNode(text: "Switch")
+        button.name = "switchButton"
+        button.fontSize = 20
+        button.position = CGPoint(x: size.width * 0.1, y: size.height * 0.1)
+        addChild(button)
+    }
+    
     func setupStatusLabel() {
-        statusLabel = SKLabelNode(fontNamed: "Courier")
+        statusLabel = SKLabelNode()
         statusLabel.fontSize = 12
         statusLabel.numberOfLines = 0
         statusLabel.horizontalAlignmentMode = .left
