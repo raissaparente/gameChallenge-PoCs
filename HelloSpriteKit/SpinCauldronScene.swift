@@ -1,7 +1,7 @@
 import SpriteKit
 
 class SpinCauldronScene: SKScene {
-    var isTouching = false
+    var isCooking = false
     var potion: SKSpriteNode!
     var doneBar: SKSpriteNode!
     var loadingBar: SKSpriteNode!
@@ -19,13 +19,13 @@ class SpinCauldronScene: SKScene {
     }
 
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        isTouching = true
+        isCooking = true
         touchStartTime = nil
         didCookPotion = false
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
-        isTouching = false
+        isCooking = false
         touchStartTime = nil
         
         if !didCookPotion {
@@ -35,13 +35,13 @@ class SpinCauldronScene: SKScene {
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
-        isTouching = false
+        isCooking = false
         touchStartTime = nil
 
     }
     
     override func update(_ currentTime: TimeInterval) {
-        guard isTouching else { return }
+        guard isCooking else { return }
         
         potion.zRotation += -0.05
         
@@ -59,7 +59,7 @@ class SpinCauldronScene: SKScene {
             
             if duration >= mininumCookingTime {
                 didCookPotion = true
-                isTouching = false
+                isCooking = false
             }
         }
         

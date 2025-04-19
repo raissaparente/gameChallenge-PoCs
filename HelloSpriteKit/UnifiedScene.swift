@@ -29,15 +29,22 @@ class UnifiedScene: SKScene {
     
     //MARK: CHOPPING ACTION
     var block: ChoppingBlockSprite!
-    var counter: SKLabelNode!
     var currentNumberClicks = 0
     var maxNumberClicks = 20
-    var didFinishDicing = false
+    
+    //MARK: COOKING ACTION
+    var didCookPotion = false
+    var touchStartTime: TimeInterval?
+    
+    //MARK: COOKING BAR
+    var doneBar: SKSpriteNode!
+    var loadingBar: SKSpriteNode!
+    let mininumCookingTime = 4.0 //secs
+    let maxBarWidth = 150.0
     
     var statusLabel: SKLabelNode!
     
     var sandboxArea: SandboxArea!
-    
     
     override init(size: CGSize) {
         super.init(size: size)
@@ -53,13 +60,24 @@ class UnifiedScene: SKScene {
         setupBlock()
         setupSwitchButton()
         setupStatusLabel()
+        setupCookingBar()
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
         moveIngredientToClickedDestination(touches: touches)
+        startCookingLongTouch()
+    }
+    
+    override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
+        stopCookingLongTouch()
+    }
+    
+    override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
+        cancelCookingLongTouch()
     }
     
     override func update(_ currentTime: TimeInterval) {
+        handleCookingBarGrowth(currentTime: currentTime)
     }
     
     
@@ -88,8 +106,6 @@ class UnifiedScene: SKScene {
     func updatePotion(with secondIngredient: Ingredient) {
         potionSprite.potion.addIngredient(secondIngredient)
     }
-    
-    
     
     func clickToChopIngredient() -> Bool {
         guard let ingredientSprite = selectedIngredient as? IngredientSprite else { return false }
@@ -131,6 +147,64 @@ class UnifiedScene: SKScene {
         self.run(explodeSequence)
     }
     
+    //MARK: COOKING ACTIONS
+    func handleCookingBarGrowth(currentTime: TimeInterval) {
+        guard selectedCauldronSprite.cauldron.isCooking else { return }
+        
+        potionSprite.zRotation += -0.05
+        
+        if touchStartTime == nil {
+            touchStartTime = currentTime
+        }
+        
+        if let startTime = touchStartTime {
+            let duration = currentTime - startTime
+            let progress = min(duration/mininumCookingTime, 1.0) //fraction of success
+            
+            let barWidth = maxBarWidth * CGFloat(progress)
+            doneBar.size.width = barWidth
+            
+            
+            if duration >= mininumCookingTime {
+                didCookPotion = true
+                selectedCauldronSprite.cauldron.isCooking = false
+            }
+        }
+        
+        if didCookPotion {
+            potionSprite.color = .blue
+            doneBar.color = .blue
+            potionSprite.zRotation = 0
+        }
+    }
+    
+    func startCookingLongTouch() {
+        guard selectedCauldronSprite.cauldron.isFull else { return }
+        
+        selectedCauldronSprite.cauldron.isCooking = true
+        touchStartTime = nil
+        didCookPotion = false
+    }
+    
+    func stopCookingLongTouch() {
+        guard selectedCauldronSprite.cauldron.isFull else { return }
+
+        selectedCauldronSprite.cauldron.isCooking = false
+        touchStartTime = nil
+        
+        if !didCookPotion {
+            doneBar.size.width = 0
+            potionSprite.zRotation = 0
+        }
+    }
+    
+    func cancelCookingLongTouch() {
+        guard selectedCauldronSprite.cauldron.isFull else { return }
+
+        selectedCauldronSprite.cauldron.isCooking = false
+        touchStartTime = nil
+    }
+    
     
     //MARK: TOUCHES BEGAN BEHAVIOUR
     func moveIngredientToClickedDestination(touches: Set<UITouch>) {
@@ -139,14 +213,13 @@ class UnifiedScene: SKScene {
         let location = touch.location(in: self)
         let tappedNode = atPoint(location)
         
+        //se nada foi selecionado ainda
         if selectIngredient(tappedNode) { return }
         if tapSwitchCauldronButton(tappedNode) { return }
         
         guard let selected = selectedIngredient else { return }
         switch selected.state {
         case .idle:
-            
-            
             if takeSelectedToSandbox(touch) { return }
             if takeSelectedToCauldron(tappedNode) { return }
             if takeSelectedToBlock(tappedNode) { return }
@@ -163,10 +236,6 @@ class UnifiedScene: SKScene {
         case .cooking:
             break
         }
-        
-//        selected.run(SKAction.scale(to: ingredientScaleNormal, duration: 0.1))
-//        selectedIngredient = nil
-
     }
     
     func tapSwitchCauldronButton(_ tappedNode: SKNode) -> Bool {
@@ -365,6 +434,19 @@ class UnifiedScene: SKScene {
         statusLabel.zPosition = 100
         statusLabel.preferredMaxLayoutWidth = size.width * 0.4
         addChild(statusLabel)
+    }
+    
+    func setupCookingBar() {
+        loadingBar = SKSpriteNode(color: .gray, size: CGSize(width: maxBarWidth, height: 20))
+        loadingBar.position = CGPoint(x: size.width/2, y: size.height - 100)
+        addChild(loadingBar)
+        
+        doneBar = SKSpriteNode(color: .gray, size: CGSize(width: 0, height: 18))
+        doneBar.anchorPoint = CGPoint(x: 0, y: 0)
+        let bottomLeftCorner = CGPoint(x: (-loadingBar.size.width/2) + 2.5, y: (-loadingBar.size.height/2)+2.5)
+        doneBar.position = bottomLeftCorner
+        doneBar.color = .red
+        loadingBar.addChild(doneBar)
     }
     
     func printStatus() {

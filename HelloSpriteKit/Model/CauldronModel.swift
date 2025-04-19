@@ -10,6 +10,12 @@ struct Cauldron {
     let effect: CauldronEffects
     var ingredients: [Ingredient] = []
     
+    var isFull: Bool {
+        return ingredients.count >= 2
+    }
+    
+    var isCooking: Bool = false
+    
     mutating func addIngredient(_ ingredient: Ingredient) {
         self.ingredients.append(ingredient)
     }
