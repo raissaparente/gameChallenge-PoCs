@@ -64,8 +64,10 @@ class UnifiedScene: SKScene {
     }
     
     override func touchesBegan(_ touches: Set<UITouch>, with event: UIEvent?) {
-        moveIngredientToClickedDestination(touches: touches)
-        startCookingLongTouch()
+        guard let touch = touches.first else { return }
+
+        moveIngredientToClickedDestination(touch: touch)
+        startCookingLongTouch(touch: touch)
     }
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -178,9 +180,14 @@ class UnifiedScene: SKScene {
         }
     }
     
-    func startCookingLongTouch() {
+    func startCookingLongTouch(touch: UITouch) {
         guard selectedCauldronSprite.cauldron.isFull else { return }
         
+        //so funciona se clicar na pocao
+        let location = touch.location(in: self)
+        let tappedNode = atPoint(location)
+        guard tappedNode is PotionSprite else { return }
+
         selectedCauldronSprite.cauldron.isCooking = true
         touchStartTime = nil
         didCookPotion = false
@@ -207,9 +214,7 @@ class UnifiedScene: SKScene {
     
     
     //MARK: TOUCHES BEGAN BEHAVIOUR
-    func moveIngredientToClickedDestination(touches: Set<UITouch>) {
-        guard let touch = touches.first else { return }
-        
+    func moveIngredientToClickedDestination(touch: UITouch) {
         let location = touch.location(in: self)
         let tappedNode = atPoint(location)
         
