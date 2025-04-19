@@ -34,7 +34,7 @@ struct Ingredient {
 }
 
 enum EffectType: String, Codable, CaseIterable, Identifiable {
-    case memory, health, courage, affection, wisdom
+    case memory, health, courage, affection, wisdom, charm, strength, sanity
     
     var id: String { rawValue }
     
@@ -45,6 +45,9 @@ enum EffectType: String, Codable, CaseIterable, Identifiable {
         case .courage: return "coragem"
         case .affection: return "afeto"
         case .wisdom: return "sabedoria"
+        case .charm: return "charme"
+        case .strength: return "força"
+        case .sanity: return "sanidade"
         }
     }
 }

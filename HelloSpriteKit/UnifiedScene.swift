@@ -6,12 +6,41 @@
 //
 import SpriteKit
 
-
 class UnifiedScene: SKScene {
+    //PEDIDO E INGREDIENTES TESTE -- NAO VAI FICAR NESSE ARQUIVO
+    
+    //combinacao certa: quartzo + lagrima (1 e 2)
+    let pedido = Pedido(nome: "Bardo apaixonado",
+                        efeitosDesejados: [
+                            IngredientEffect(type: .affection, isPositive: true),
+                            IngredientEffect(type: .memory, isPositive: true)
+                        ])
+    
     let ingredients = [
-        Ingredient(imageNames: ["red1", "red2", "red3"], dicedTextureName: "redDice", possibleEffects: [IngredientEffect(type: .affection, isPositive: true), IngredientEffect(type: .health, isPositive: true)]),
-        Ingredient(imageNames: ["green1", "green2", "green3"], dicedTextureName: "greenDice", possibleEffects: [IngredientEffect(type: .memory, isPositive: true), IngredientEffect(type: .wisdom, isPositive: false)]),
-        Ingredient(imageNames: ["c1", "c2", "c3"], dicedTextureName: "dices", possibleEffects: [IngredientEffect(type: .health, isPositive: true), IngredientEffect(type: .memory, isPositive: false)])
+        //quartzo rosa
+        Ingredient(imageNames: ["red1", "red2", "red3"],
+                   dicedTextureName: "redDice",
+                   possibleEffects: [
+                    IngredientEffect(type: .affection, isPositive: true),
+                    IngredientEffect(type: .charm, isPositive: true)]),
+        //lagrima congelada
+        Ingredient(imageNames: ["green1", "green2", "green3"],
+                   dicedTextureName: "greenDice",
+                   possibleEffects: [
+                    IngredientEffect(type: .memory, isPositive: true),
+                    IngredientEffect(type: .strength, isPositive: true)]),
+        //raiz de mandragora
+        Ingredient(imageNames: ["c1", "c2", "c3"],
+                   dicedTextureName: "dices",
+                   possibleEffects: [
+                    IngredientEffect(type: .sanity, isPositive: true),
+                    IngredientEffect(type: .courage, isPositive: false)]),
+        //valeriana
+        Ingredient(imageNames: ["green1", "green2", "green3"],
+                   dicedTextureName: "greenDice",
+                   possibleEffects: [
+                    IngredientEffect(type: .health, isPositive: true),
+                    IngredientEffect(type: .affection, isPositive: false)])
     ]
     
     let cauldronsData = [
@@ -72,6 +101,10 @@ class UnifiedScene: SKScene {
     
     override func touchesEnded(_ touches: Set<UITouch>, with event: UIEvent?) {
         stopCookingLongTouch()
+        
+        if didCookPotion {
+            printResult()
+        }
     }
     
     override func touchesCancelled(_ touches: Set<UITouch>, with event: UIEvent?) {
@@ -242,6 +275,7 @@ class UnifiedScene: SKScene {
             break
         }
     }
+    
     
     func tapSwitchCauldronButton(_ tappedNode: SKNode) -> Bool {
         guard tappedNode.name == "switchButton" else { return false }
@@ -495,6 +529,14 @@ class UnifiedScene: SKScene {
         statusLabel.text = text
     }
 
+    func printResult() {
+        let ingredients = selectedCauldronSprite.cauldron.ingredients
+        let caldeirao = selectedCauldronSprite.cauldron.effect
+        
+        let compatibilidade = calcularCompatibilidade(ingredientes: ingredients, pedido: pedido, caldeirao: caldeirao)
+        
+        print("Compatibilidade: \(String(format: "%.1f", compatibilidade))%")
+    }
 }
 
 extension SKNode {
