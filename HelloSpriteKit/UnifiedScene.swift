@@ -9,7 +9,7 @@ import SpriteKit
 class UnifiedScene: SKScene {
     //PEDIDO E INGREDIENTES TESTE -- NAO VAI FICAR NESSE ARQUIVO
     
-    //combinacao certa: quartzo + lagrima (1 e 2)
+    //combinacao certa: quartzo + lagrima
     let pedido = Pedido(nome: "Bardo apaixonado",
                         efeitosDesejados: [
                             IngredientEffect(type: .affection, isPositive: true),
@@ -44,8 +44,8 @@ class UnifiedScene: SKScene {
     ]
     
     let cauldronsData = [
-        Cauldron(effect: .copper),
-        Cauldron(effect: .iron)
+        Cauldron(effect: .iron),
+        Cauldron(effect: .copper)
     ]
     
     var selectedCauldronIndex = 0
@@ -53,8 +53,8 @@ class UnifiedScene: SKScene {
     var potionSprite: PotionSprite!
     
     var selectedIngredient: IngredientSprite? = nil
-    let ingredientScaleNormal: CGFloat = 0.09
-    let ingredientScaleSelected: CGFloat = 0.12
+    let ingredientScaleNormal: CGFloat = 0.08
+    let ingredientScaleSelected: CGFloat = 0.1
     
     //MARK: CHOPPING ACTION
     var block: ChoppingBlockSprite!
@@ -116,32 +116,12 @@ class UnifiedScene: SKScene {
     }
     
     
-    func switchCauldron() {
-        // remove current cauldron
-        selectedCauldronSprite.removeFromParent()
-        
-        // update index
-        selectedCauldronIndex = (selectedCauldronIndex + 1) % cauldronsData.count
-        
-        // add new cauldron
-        let xPosition = size.width * 0.3
-        let yPosition = size.height * 0.2
-        
-        let newCauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
-        newCauldron.position = CGPoint(x: xPosition, y: yPosition)
-        newCauldron.setScale(0.25)
-        
-        selectedCauldronSprite = newCauldron
-        addChild(newCauldron)
-        
-        printStatus()
-    }
-    
-    
     func updatePotion(with secondIngredient: Ingredient) {
         potionSprite.potion.addIngredient(secondIngredient)
+        loadingBar.isHidden = !selectedCauldronSprite.cauldron.isFull
     }
     
+    //MARK: CHOP INGREDIENT ACTIONS
     func clickToChopIngredient() -> Bool {
         guard let ingredientSprite = selectedIngredient as? IngredientSprite else { return false }
         guard currentNumberClicks < maxNumberClicks else { return false  }
@@ -246,7 +226,7 @@ class UnifiedScene: SKScene {
     }
     
     
-    //MARK: TOUCHES BEGAN BEHAVIOUR
+    //MARK: MOVE/SELECT INGREDIENT ACTIONS
     func moveIngredientToClickedDestination(touch: UITouch) {
         let location = touch.location(in: self)
         let tappedNode = atPoint(location)
@@ -275,14 +255,7 @@ class UnifiedScene: SKScene {
             break
         }
     }
-    
-    
-    func tapSwitchCauldronButton(_ tappedNode: SKNode) -> Bool {
-        guard tappedNode.name == "switchButton" else { return false }
-        switchCauldron()
-        return true
-    }
-    
+        
     func selectIngredient(_ tappedNode: SKNode) -> Bool {
         guard let tappedIngredient = tappedNode as? IngredientSprite else { return false }
         
@@ -370,13 +343,13 @@ class UnifiedScene: SKScene {
     
     func takeSelectedToCauldron(_ tappedNode: SKNode) -> Bool{
         guard let selected = selectedIngredient else { return false }
-        guard let cauldronSprite = tappedNode as? CauldronSprite else { return false }
-        
-        print(selected.position, cauldronSprite.position)
-                
+        guard tappedNode is CauldronSprite || tappedNode is PotionSprite else {
+            return false
+        }
+                        
         //move ingredient to cauldron
         if let ingredientParent = selected.parent {
-            guard let convertedCauldronPosition = ingredientParent.convertedPosition(of: cauldronSprite) else { return false }
+            guard let convertedCauldronPosition = ingredientParent.convertedPosition(of: selectedCauldronSprite) else { return false }
                 
                 let moveAction = SKAction.move(to: convertedCauldronPosition, duration: 0.2)
                 selected.run(SKAction.sequence([
@@ -388,11 +361,11 @@ class UnifiedScene: SKScene {
         
         //add ingredient to cauldron - data
         var ingredientData = selected.ingredient
-        cauldronSprite.cauldron.effect.effect(ingredient: &ingredientData)
+        selectedCauldronSprite.cauldron.effect.effect(ingredient: &ingredientData)
             
         
         //add ingredient to cauldron - interface
-        cauldronSprite.cauldron.addIngredient(ingredientData)
+        selectedCauldronSprite.cauldron.addIngredient(ingredientData)
         if potionSprite == nil {
             setupPotion(with: ingredientData)
         } else {
@@ -404,10 +377,37 @@ class UnifiedScene: SKScene {
         return true
     }
     
+    func tapSwitchCauldronButton(_ tappedNode: SKNode) -> Bool {
+        guard tappedNode.name == "switchButton" else { return false }
+        switchCauldron()
+        return true
+    }
+    
+    func switchCauldron() {
+        // remove current cauldron
+        selectedCauldronSprite.removeFromParent()
+        
+        // update index
+        selectedCauldronIndex = (selectedCauldronIndex + 1) % cauldronsData.count
+        
+        // add new cauldron
+        let xPosition = size.width * 0.3
+        let yPosition = size.height * 0.2
+        
+        let newCauldron = CauldronSprite(cauldron: cauldronsData[selectedCauldronIndex])
+        newCauldron.position = CGPoint(x: xPosition, y: yPosition)
+        newCauldron.setScale(0.25)
+        
+        selectedCauldronSprite = newCauldron
+        addChild(newCauldron)
+        
+        printStatus()
+    }
+
     
     //MARK: SETUP UI
     func setupIngredients() {
-        let spacing: CGFloat = 100
+        let spacing: CGFloat = 80
         let centerY = size.height / 2
         let xPosition = size.width * 0.9
         
@@ -477,7 +477,8 @@ class UnifiedScene: SKScene {
     
     func setupCookingBar() {
         loadingBar = SKSpriteNode(color: .gray, size: CGSize(width: maxBarWidth, height: 20))
-        loadingBar.position = CGPoint(x: size.width/2, y: size.height - 100)
+        let yOffset = selectedCauldronSprite.size.height/2 + 20
+        loadingBar.position = CGPoint(x: selectedCauldronSprite.position.x, y: selectedCauldronSprite.position.y + yOffset)
         addChild(loadingBar)
         
         doneBar = SKSpriteNode(color: .gray, size: CGSize(width: 0, height: 18))
@@ -486,6 +487,8 @@ class UnifiedScene: SKScene {
         doneBar.position = bottomLeftCorner
         doneBar.color = .red
         loadingBar.addChild(doneBar)
+        
+        loadingBar.isHidden = true
     }
     
     func printStatus() {
@@ -545,4 +548,15 @@ extension SKNode {
         guard let targetParent = node.parent else { return nil }
         return self.convert(node.position, from: targetParent)
     }
+}
+
+//pega o no debaixo no toque
+func nodeBelow(_ node: SKNode, at location: CGPoint) -> SKNode? {
+    let childNode = node.atPoint(location)
+    
+    if childNode == node {
+        return nil
+    }
+    
+    return childNode
 }
