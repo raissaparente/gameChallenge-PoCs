@@ -5,15 +5,12 @@
 //  Created by Raissa Bruna Parente on 19/04/25.
 //
 
-struct Pedido {
-    let nome: String
-    let efeitosDesejados: [IngredientEffect]
-}
+
 
 
 func calcularCompatibilidade(
     ingredientes: [Ingredient],
-    pedido: Pedido,
+    pedido: Order,
     caldeirao: CauldronEffects
 ) -> Double {
     guard ingredientes.count == 2 else { return 0.0 }
@@ -36,7 +33,7 @@ func calcularCompatibilidade(
 
     var somasIndividuais: [Double] = []
 
-    for efeitoDesejado in pedido.efeitosDesejados {
+    for efeitoDesejado in pedido.desiredEffects {
         let obtido = soma[efeitoDesejado.type, default: 0]
         let desejado = efeitoDesejado.points
         

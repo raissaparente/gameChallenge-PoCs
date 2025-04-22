@@ -10,37 +10,33 @@ class UnifiedScene: SKScene {
     //PEDIDO E INGREDIENTES TESTE -- NAO VAI FICAR NESSE ARQUIVO
     
     //combinacao certa: quartzo + lagrima
-    let pedido = Pedido(nome: "Bardo apaixonado",
-                        efeitosDesejados: [
+    let pedido = Order(description: ["Sou Bardo apaixonado", "quero xyz"],
+                        desiredEffects: [
                             IngredientEffect(type: .affection, isPositive: true),
                             IngredientEffect(type: .memory, isPositive: true)
-                        ])
+                        ], phase: 1)
     
     let ingredients = [
-        //quartzo rosa
-        Ingredient(imageNames: ["red1", "red2", "red3"],
+        Ingredient(name: "Quartzo Rosa", imageNames: ["red1", "red2", "red3"],
                    dicedTextureName: "redDice",
                    possibleEffects: [
                     IngredientEffect(type: .affection, isPositive: true),
-                    IngredientEffect(type: .charm, isPositive: true)]),
-        //lagrima congelada
-        Ingredient(imageNames: ["green1", "green2", "green3"],
+                    IngredientEffect(type: .charm, isPositive: true)], flavor: .sour),
+        Ingredient(name: "Lágrima Congelada", imageNames: ["green1", "green2", "green3"],
                    dicedTextureName: "greenDice",
                    possibleEffects: [
                     IngredientEffect(type: .memory, isPositive: true),
-                    IngredientEffect(type: .strength, isPositive: true)]),
-        //raiz de mandragora
-        Ingredient(imageNames: ["c1", "c2", "c3"],
+                    IngredientEffect(type: .strength, isPositive: true)], flavor: .sweet),
+        Ingredient(name: "Raiz de Mandrágora", imageNames: ["c1", "c2", "c3"],
                    dicedTextureName: "dices",
                    possibleEffects: [
                     IngredientEffect(type: .sanity, isPositive: true),
-                    IngredientEffect(type: .courage, isPositive: false)]),
-        //valeriana
-        Ingredient(imageNames: ["green1", "green2", "green3"],
+                    IngredientEffect(type: .courage, isPositive: false)], flavor: .salty),
+        Ingredient(name: "Valeriana", imageNames: ["green1", "green2", "green3"],
                    dicedTextureName: "greenDice",
                    possibleEffects: [
                     IngredientEffect(type: .health, isPositive: true),
-                    IngredientEffect(type: .affection, isPositive: false)])
+                    IngredientEffect(type: .affection, isPositive: false)], flavor: .bitter)
     ]
     
     let cauldronsData = [

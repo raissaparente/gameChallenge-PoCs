@@ -8,16 +8,20 @@
 import SpriteKit
 
 struct Ingredient {
+    var name: String
     var imageNames: [String]
     var dicedTextureName: String
     var possibleEffects: [IngredientEffect]
     var activeEffect: IngredientEffect?
+    var flavor: Flavor
     
-    init(imageNames: [String], dicedTextureName: String, possibleEffects: [IngredientEffect], activeEffect: IngredientEffect? = nil) {
+    init(name: String, imageNames: [String], dicedTextureName: String, possibleEffects: [IngredientEffect], activeEffect: IngredientEffect? = nil, flavor: Flavor) {
+        self.name = name
         self.imageNames = imageNames
         self.dicedTextureName = dicedTextureName
         self.possibleEffects = possibleEffects
         self.activeEffect = activeEffect
+        self.flavor = flavor
         
         self.chooseEffect(isDiced: false)
     }
@@ -30,45 +34,6 @@ struct Ingredient {
     //quando mudar o caldeirao
     mutating func toggleActiveEffect() {
         activeEffect?.toggle()
-    }
-}
-
-enum EffectType: String, Codable, CaseIterable, Identifiable {
-    case memory, health, courage, affection, wisdom, charm, strength, sanity
-    
-    var id: String { rawValue }
-    
-    var description: String {
-        switch self {
-        case .memory: return "memória"
-        case .health: return "saúde"
-        case .courage: return "coragem"
-        case .affection: return "afeto"
-        case .wisdom: return "sabedoria"
-        case .charm: return "charme"
-        case .strength: return "força"
-        case .sanity: return "sanidade"
-        }
-    }
-}
-
-struct IngredientEffect: Codable, Identifiable {
-    let type: EffectType
-    var isPositive: Bool
-    
-    var id: String { "\(type.rawValue)-\(isPositive)" }
-    
-    var points: Int {
-        isPositive ? 1 : -1
-    }
-    
-    var effectText: String {
-        let verb = isPositive ? "Aumenta" : "Diminui"
-        return "\(verb) sua \(type.description)"
-    }
-    
-    mutating func toggle() {
-        isPositive.toggle()
     }
 }
 

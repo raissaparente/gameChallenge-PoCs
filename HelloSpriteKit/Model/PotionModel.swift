@@ -22,6 +22,10 @@ struct Potion {
         }
     }
     
+    var flavor: Flavor {
+        return ingredients.last?.flavor ?? .flavorless
+    }
+    
     mutating func addIngredient(_ ingredient: Ingredient) {
         self.ingredients.append(ingredient)
     }
