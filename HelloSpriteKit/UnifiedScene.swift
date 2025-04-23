@@ -323,6 +323,13 @@ class UnifiedScene: SKScene {
         guard let selected = selectedIngredient as? IngredientSprite else { return false }
         guard let block = tappedNode as? ChoppingBlockSprite else { return false }
         
+        //clear slots if occupied
+        if let _ = sandboxArea.firstSlot.childNode(withName: selected.name!) {
+            sandboxArea.clearSlot(sandboxArea.firstSlot)
+        } else if (sandboxArea.secondSlot.childNode(withName: selected.name!) != nil) {
+            sandboxArea.clearSlot(sandboxArea.secondSlot)
+        }
+        
         selectedIngredient?.removeFromParent()
         addChild(selected)
         
@@ -330,6 +337,7 @@ class UnifiedScene: SKScene {
         selectedIngredient?.run(moveAction)
         
         selectedIngredient?.state = .inChoppingBlock
+        currentNumberClicks = 0
         printStatus()
         
         //        desselectIngredient()
@@ -343,6 +351,13 @@ class UnifiedScene: SKScene {
             return false
         }
                         
+        //clear slots if occupied
+        if let _ = sandboxArea.firstSlot.childNode(withName: selected.name!) {
+            sandboxArea.clearSlot(sandboxArea.firstSlot)
+        } else if (sandboxArea.secondSlot.childNode(withName: selected.name!) != nil) {
+            sandboxArea.clearSlot(sandboxArea.secondSlot)
+        }
+        
         //move ingredient to cauldron
         if let ingredientParent = selected.parent {
             guard let convertedCauldronPosition = ingredientParent.convertedPosition(of: selectedCauldronSprite) else { return false }
