@@ -121,7 +121,7 @@ class UnifiedScene: SKScene {
     func clickToChopIngredient() -> Bool {
         guard let ingredientSprite = selectedIngredient as? IngredientSprite else { return false }
         guard currentNumberClicks < maxNumberClicks else { return false  }
-
+                
         currentNumberClicks += 1
         explodingDicedPieces()
         
@@ -227,6 +227,8 @@ class UnifiedScene: SKScene {
         let location = touch.location(in: self)
         let tappedNode = atPoint(location)
         
+        print(tappedNode)
+        
         //se nada foi selecionado ainda
         if selectIngredient(tappedNode) { return }
         if tapSwitchCauldronButton(tappedNode) { return }
@@ -239,7 +241,9 @@ class UnifiedScene: SKScene {
             if takeSelectedToBlock(tappedNode) { return }
             
         case .inChoppingBlock:
-            if clickToChopIngredient() { return }
+            if tappedNode.name == "block" || tappedNode.name == "ingredient" {
+                if clickToChopIngredient() { return }
+            }
             
         case .chopped:
             if takeSelectedToSandbox(touch) { return }
@@ -427,6 +431,7 @@ class UnifiedScene: SKScene {
             let offset = CGFloat(index - (ingredients.count - 1) / 2) * spacing
             ingredient.position = CGPoint(x: xPosition, y: centerY + offset)
             ingredient.setScale(ingredientScaleNormal)
+            ingredient.name = "ingredient"
             addChild(ingredient)
         }
     }
@@ -448,6 +453,7 @@ class UnifiedScene: SKScene {
         block.size = CGSize(width: 350, height: 150)
         block.position = CGPoint(x: size.width * 0.2, y: size.height * 0.75)
         block.zPosition = -5
+        block.name = "block"
         addChild(block)
         
         sandboxArea = SandboxArea(color: .darkGray, size: CGSize(width: 250, height: 120))
